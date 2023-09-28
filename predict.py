@@ -38,9 +38,12 @@ import inspect
 B_INST, E_INST = "[INST]", "[/INST]"
 B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
 PROMPT_TEMPLATE = f"<s>{B_INST} {{instruction}} {E_INST}"
-PROMPT_TEMPLATE_WITH_SYSTEM_PROMPT = f"<s>{B_INST} {B_SYS}{{system_prompt}}{E_SYS}{{instruction}} {E_INST}"
+PROMPT_TEMPLATE_WITH_SYSTEM_PROMPT = (
+    f"<s>{B_INST} {B_SYS}{{system_prompt}}{E_SYS}{{instruction}} {E_INST}"
+)
 
 DEFAULT_SYSTEM_PROMPT = """"""
+
 
 def wait_pget(file_name: str) -> None:
     for i in range(int(600 / 0.05)):
@@ -50,8 +53,9 @@ def wait_pget(file_name: str) -> None:
 
 
 class Predictor(BasePredictor):
+    is_instruct = "-instruct" in model
+
     def setup(self) -> None:
-        self.is_instruct = "-instruct" in model
         if pget_proc:
             if pget_proc.wait() != 0:
                 print("Download failed, trying again")
@@ -70,7 +74,7 @@ class Predictor(BasePredictor):
         self,
         prompt: str = Input(description="Prompt"),
         system_prompt: str = Input(
-            description="System prompt to send to CodeLlama. This is prepended to the prompt and helps guide system behavior.", 
+            description="System prompt to send to CodeLlama. This is prepended to the prompt and helps guide system behavior.",
             default=DEFAULT_SYSTEM_PROMPT,
         ),
         max_tokens: int = Input(
@@ -89,13 +93,14 @@ class Predictor(BasePredictor):
             description="Repetition penalty", ge=0.0, le=2.0, default=1.1
         ),
     ) -> ConcatenateIterator[str]:
-        
-        user_prompt = prompt.strip('\n').lstrip(B_INST).rstrip(E_INST).strip()
+        user_prompt = prompt.strip("\n").lstrip(B_INST).rstrip(E_INST).strip()
         prompt_templated = PROMPT_TEMPLATE.format(instruction=user_prompt)
 
         # If USE_SYSTEM_PROMPT is True, and the user has supplied some sort of system prompt, we add it to the prompt.
-        if self.is_instruct and system_prompt != '':
-            prompt_templated = PROMPT_TEMPLATE_WITH_SYSTEM_PROMPT.format(system_prompt=system_prompt, instruction=user_prompt)
+        if self.is_instruct and system_prompt != "":
+            prompt_templated = PROMPT_TEMPLATE_WITH_SYSTEM_PROMPT.format(
+                system_prompt=system_prompt, instruction=user_prompt
+            )
 
         print("Prompt:\n" + prompt_templated)
 
@@ -113,7 +118,6 @@ class Predictor(BasePredictor):
             mirostat_mode=0,
         ):
             yield tok["choices"][0]["text"]
-    
 
     _predict = predict
 
@@ -124,11 +128,7 @@ class Predictor(BasePredictor):
     # for the purposes of inspect.signature as used by predictor.get_input_type,
     # remove the argument (system_prompt)
     # this removes system_prompt from the Replicate API for non-chat models.
-    
-    with open("model.txt") as f:
-        model = f.read().strip()
-    is_instruct = "-instruct" in model
-    
+
     if not is_instruct:
         wrapper = base_predict
         sig = inspect.signature(_predict)
