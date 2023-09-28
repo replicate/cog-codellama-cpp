@@ -29,7 +29,18 @@ else:
 
 from cog import BasePredictor, Input, ConcatenateIterator
 from llama_cpp import Llama
+import inspect
 
+# This prompt formatting was copied from the original CodeLlama repo:
+# https://github.com/facebookresearch/llama/blob/6c7fe276574e78057f917549435a2554000a876d/llama/generation.py#L44
+
+# These are components of the prompt that should not be changed by the users
+B_INST, E_INST = "[INST]", "[/INST]"
+B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
+PROMPT_TEMPLATE = f"<s>{B_INST} {{instruction}} {E_INST}"
+PROMPT_TEMPLATE_WITH_SYSTEM_PROMPT = f"<s>{B_INST} {B_SYS}{{system_prompt}}{E_SYS}{{instruction}} {E_INST}"
+
+DEFAULT_SYSTEM_PROMPT = """"""
 
 def wait_pget(file_name: str) -> None:
     for i in range(int(600 / 0.05)):
@@ -58,6 +69,10 @@ class Predictor(BasePredictor):
     def predict(
         self,
         prompt: str = Input(description="Prompt"),
+        system_prompt: str = Input(
+            description="System prompt to send to CodeLlama. This is prepended to the prompt and helps guide system behavior.", 
+            default=DEFAULT_SYSTEM_PROMPT,
+        ),
         max_tokens: int = Input(
             description="Max number of tokens to return", default=500
         ),
@@ -74,12 +89,18 @@ class Predictor(BasePredictor):
             description="Repetition penalty", ge=0.0, le=2.0, default=1.1
         ),
     ) -> ConcatenateIterator[str]:
-        if self.is_instruct:
-            prompt = f"<s>[INST] {prompt} [/INST]"
-        print("Prompt:\n" + prompt)
+        
+        user_prompt = prompt.strip('\n').lstrip(B_INST).rstrip(E_INST).strip()
+        prompt_templated = PROMPT_TEMPLATE.format(instruction=user_prompt)
+
+        # If USE_SYSTEM_PROMPT is True, and the user has supplied some sort of system prompt, we add it to the prompt.
+        if self.is_instruct and system_prompt != '':
+            prompt_templated = PROMPT_TEMPLATE_WITH_SYSTEM_PROMPT.format(system_prompt=system_prompt, instruction=user_prompt)
+
+        print("Prompt:\n" + prompt_templated)
 
         for tok in self.llm(
-            prompt,
+            prompt_templated,
             grammar=None,
             max_tokens=max_tokens,
             stream=True,
@@ -92,3 +113,25 @@ class Predictor(BasePredictor):
             mirostat_mode=0,
         ):
             yield tok["choices"][0]["text"]
+    
+
+    _predict = predict
+
+    def base_predict(self, *args, **kwargs) -> ConcatenateIterator:
+        kwargs["system_prompt"] = None
+        return self._predict(*args, **kwargs)
+
+    # for the purposes of inspect.signature as used by predictor.get_input_type,
+    # remove the argument (system_prompt)
+    # this removes system_prompt from the Replicate API for non-chat models.
+    
+    with open("model.txt") as f:
+        model = f.read().strip()
+    is_instruct = "-instruct" in model
+    
+    if not is_instruct:
+        wrapper = base_predict
+        sig = inspect.signature(_predict)
+        params = [p for name, p in sig.parameters.items() if name != "system_prompt"]
+        wrapper.__signature__ = sig.replace(parameters=params)
+        predict = wrapper
