@@ -99,14 +99,18 @@ class Predictor(BasePredictor):
             description="Repetition penalty", ge=0.0, le=2.0, default=1.1
         ),
     ) -> ConcatenateIterator[str]:
-        user_prompt = prompt.strip("\n").lstrip(B_INST).rstrip(E_INST).strip()
-        prompt_templated = PROMPT_TEMPLATE.format(instruction=user_prompt)
+        
 
         # If USE_SYSTEM_PROMPT is True, and the user has supplied some sort of system prompt, we add it to the prompt.
-        if self.is_instruct and system_prompt != "":
+        if self.is_instruct:
+            user_prompt = prompt.strip("\n").lstrip(B_INST).rstrip(E_INST).strip()
             prompt_templated = PROMPT_TEMPLATE_WITH_SYSTEM_PROMPT.format(
-                system_prompt=system_prompt, instruction=user_prompt
+                    system_prompt=system_prompt, instruction=user_prompt
             )
+        
+        elif not self.is_instruct:
+            prompt_templated = prompt
+
 
         print("Prompt:\n" + prompt_templated)
 
