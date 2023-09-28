@@ -64,8 +64,9 @@ class Predictor(BasePredictor):
                 subprocess.check_call(["pget", model_url, model_path])
                 print("Downloading weights took: ", time.time() - start)
         else:
-            print("error!! no pget proc")
+            wait_time = time.time()
             wait_pget(model_path)
+            print("Spent {time.time() - wait_time:.3f} waiting for previously launched pget")
         self.llm = Llama(
             model_path, n_ctx=4096, n_gpu_layers=-1, main_gpu=0, n_threads=1
         )

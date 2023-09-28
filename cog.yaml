@@ -13,5 +13,6 @@ build:
     - "CMAKE_ARGS='-DLLAMA_CUBLAS=on' FORCE_CMAKE=1 pip install llama-cpp-python==0.2.6 --no-cache-dir"
     - "curl -o /usr/local/bin/pget -L 'https://github.com/replicate/pget/releases/download/v0.0.4/pget' && chmod +x /usr/local/bin/pget"
     - "mkdir -p /models"
+    #- "ln -s --force $(which echo) $(which pip)"
 
 predict: "predict.py:Predictor"
