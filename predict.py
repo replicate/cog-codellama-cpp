@@ -3,6 +3,7 @@ import time
 import subprocess
 from cog import BasePredictor, Input, ConcatenateIterator
 from llama_cpp import Llama
+import inspect
 
 # This prompt formatting was copied from the original CodeLlama repo:
 # https://github.com/facebookresearch/llama/blob/6c7fe276574e78057f917549435a2554000a876d/llama/generation.py#L44
@@ -79,3 +80,25 @@ class Predictor(BasePredictor):
             mirostat_mode=0,
         ):
             yield tok["choices"][0]["text"]
+    
+
+    _predict = predict
+
+    def base_predict(self, *args, **kwargs) -> ConcatenateIterator:
+        kwargs["system_prompt"] = None
+        return self._predict(*args, **kwargs)
+
+    # for the purposes of inspect.signature as used by predictor.get_input_type,
+    # remove the argument (system_prompt)
+    # this removes system_prompt from the Replicate API for non-chat models.
+    
+    with open("model.txt") as f:
+        model = f.read().strip()
+    is_instruct = "-instruct" in model
+    
+    if not is_instruct:
+        wrapper = base_predict
+        sig = inspect.signature(_predict)
+        params = [p for name, p in sig.parameters.items() if name != "system_prompt"]
+        wrapper.__signature__ = sig.replace(parameters=params)
+        predict = wrapper
