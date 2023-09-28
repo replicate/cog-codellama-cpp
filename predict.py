@@ -10,9 +10,9 @@ model_path = f"/models/{model}"
 # model_url = f"https://storage.googleapis.com/replicate-weights/llamacpp/{model}"
 if "34b-instruct" in model:
     # use accelerated storage for only the most frequently used
-    model_url = f"https://replicate-weights.accel-object.lga1.coreweave.com/llamacpp/{model}"
+    model_url = f"https://llamacpp.accel-object.lga1.coreweave.com/{model}"
 else:
-    model_url = f"https://replicate-weights.object.lga1.coreweave.com/llamacpp/{model}"
+    model_url = f"https://llamacpp.object.lga1.coreweave.com/{model}"
 
 # don't download if we're running in docker (i.e. generating schema)
 # if (
@@ -68,8 +68,9 @@ class Predictor(BasePredictor):
         #     print(f"Spent {time.time() - wait_time:.3f} waiting for previously launched pget")
         if not os.path.exists(model_path):
             print("Downloading model weights....")
+            start = time.time()
             # model_url = f"https://weights.replicate.delivery/llamacpp/{model}"
-            subprocess.check_call(["pget", model_url, model_path], close_fds=True)
+            subprocess.check_call(["pget", "-f", model_url, model_path], close_fds=True)
             print("Downloading weights took: ", time.time() - start)
         self.llm = Llama(
             model_path, n_ctx=4096, n_gpu_layers=-1, main_gpu=0, n_threads=1
