@@ -15,6 +15,9 @@ model_path = f"/models/{model}"
 
 model_url = f"https://llamacpp.object.lga1.coreweave.com/{model}"
 
+if "34b" in model:
+    model_url = f'https://storage.googleapis.com/replicate-weights/llamacpp/{model}'
+
 # don't download if we're running in docker (i.e. generating schema)
 # if (
 #     os.getenv("PGET")
