@@ -26,7 +26,6 @@ codellama-34b:
 	echo "codellama-34b.Q5_K_M.gguf" > model.txt
 	cog push r8.im/replicate-internal/codellama-34b
 
-
 .PHONY: codellama-7b-instruct
 codellama-7b-instruct:
 	echo "codellama-7b-instruct.Q5_K_M.gguf" > model.txt
