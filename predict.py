@@ -8,11 +8,12 @@ with open("model.txt") as f:
     model = f.read().strip()
 model_path = f"/models/{model}"
 # model_url = f"https://storage.googleapis.com/replicate-weights/llamacpp/{model}"
-if "34b-instruct" in model:
-    # use accelerated storage for only the most frequently used
-    model_url = f"https://llamacpp.accel-object.lga1.coreweave.com/{model}"
-else:
-    model_url = f"https://llamacpp.object.lga1.coreweave.com/{model}"
+# if "34b-instruct" in model:
+#     # use accelerated storage for only the most frequently used
+#     model_url = f"https://llamacpp.accel-object.lga1.coreweave.com/{model}"
+# else:
+
+model_url = f"https://llamacpp.object.lga1.coreweave.com/{model}"
 
 # don't download if we're running in docker (i.e. generating schema)
 # if (
