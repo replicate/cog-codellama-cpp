@@ -1,5 +1,6 @@
-# Llama 2 grammar
+# Cog-CodeLlama-cpp
 
-[![Run on Replicate](https://replicate.com/andreasjansson/llama-2-13b-function/badge)](https://replicate.com/andreasjansson/llama-2-13b-grammar)
+[![Run on Replicate](https://replicate.com/meta/codellama-34b-instruct/badge)](https://replicate.com/meta/codellama-34b-instruct
+)
 
-Llama 2 with grammar-based decoding (provided by llama.cpp).
+Cog predictors for CodeLlama powered by llama.cpp.
