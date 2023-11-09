@@ -12,10 +12,10 @@ model_path = f"/models/{model}"
 if "34b-instruct" in model:
     # use accelerated storage for only the most frequently used
     model_url = (
-        f"https://replicate-weights.accel-object.lga1.coreweave.com/llamacpp/{model}"
+        f"https://weights.replicate.delivery/default/llamacpp/{model}"
     )
 else:
-    model_url = f"https://replicate-weights.object.lga1.coreweave.com/llamacpp/{model}"
+    model_url = f"https://weights.replicate.delivery/default/llamacpp/{model}"
 
 # don't download if we're running in docker (i.e. generating schema)
 # if (
