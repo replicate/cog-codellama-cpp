@@ -8,14 +8,7 @@ import socket
 with open("model.txt") as f:
     model = f.read().strip()
 model_path = f"/models/{model}"
-# model_url = f"https://storage.googleapis.com/replicate-weights/llamacpp/{model}"
-if "34b-instruct" in model:
-    # use accelerated storage for only the most frequently used
-    model_url = (
-        f"https://replicate-weights.accel-object.lga1.coreweave.com/llamacpp/{model}"
-    )
-else:
-    model_url = f"https://replicate-weights.object.lga1.coreweave.com/llamacpp/{model}"
+model_url = f"https://weights.replicate.delivery/default/llamacpp/{model}"
 
 # don't download if we're running in docker (i.e. generating schema)
 # if (
