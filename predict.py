@@ -10,19 +10,6 @@ with open("model.txt") as f:
 model_path = f"/models/{model}"
 model_url = f"https://weights.replicate.delivery/default/llamacpp/{model}"
 
-# don't download if we're running in docker (i.e. generating schema)
-# if (
-#     os.getenv("PGET")
-#     or not pathlib.Path("/.dockerenv").exists()
-#     and pathlib.Path(model_path).exists()
-# ):
-#     pget_proc: subprocess.Popen | None = subprocess.Popen(
-#         ["/usr/bin/pget", model_url, model_path], close_fds=True
-#     )
-#     print("Downloading model weights...")
-# else:
-#     pget_proc = None
-
 import inspect
 from cog import BasePredictor, ConcatenateIterator, Input
 from llama_cpp import Llama
@@ -54,18 +41,9 @@ class Predictor(BasePredictor):
     is_instruct = "-instruct" in model
 
     def setup(self) -> None:
-        # need_download = False
-        # if pget_proc:
-        #     if pget_proc.wait() != 0:
-        #         need_download = True
-        # else:
-        #     wait_time = time.time()
-        #     need_download = not wait_pget(model_path)
-        #     print(f"Spent {time.time() - wait_time:.3f} waiting for previously launched pget")
         if not os.path.exists(model_path):
             print(f"Downloading model weights from {model_url}....")
             start = time.time()
-            # model_url = f"https://weights.replicate.delivery/llamacpp/{model}"
             subprocess.check_call(["pget", "-f", model_url, model_path], close_fds=True)
             print("Downloading weights took: ", time.time() - start)
         self.llm = Llama(

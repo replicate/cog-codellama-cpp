@@ -11,7 +11,7 @@ build:
     - "json-schema-enforcer==0.1.4"
   run:
     - "CMAKE_ARGS='-DLLAMA_CUBLAS=on' FORCE_CMAKE=1 pip install llama-cpp-python==0.2.6 --no-cache-dir"
-    - "curl -o /usr/local/bin/pget -L 'https://github.com/replicate/pget/releases/download/v0.0.4/pget' && chmod +x /usr/local/bin/pget"
+    - "curl -o /usr/local/bin/pget -L 'https://github.com/replicate/pget/releases/download/v0.5.6/pget_linux_x86_64' && chmod +x /usr/local/bin/pget"
     - "mkdir -p /models"
     #- "ln -s --force $(which echo) $(which pip)"
 
