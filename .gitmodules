@@ -1,0 +1,3 @@
+[submodule "codellama"]
+	path = codellama
+	url = https://github.com/facebookresearch/codellama.git

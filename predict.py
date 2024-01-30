@@ -14,6 +14,8 @@ import inspect
 from cog import BasePredictor, ConcatenateIterator, Input
 from llama_cpp import Llama
 
+from utils import chat_completion_turns, tokenize
+
 # This prompt formatting was copied from the original CodeLlama repo:
 # https://github.com/facebookresearch/llama/blob/6c7fe276574e78057f917549435a2554000a876d/llama/generation.py#L44
 
@@ -25,7 +27,7 @@ PROMPT_TEMPLATE_WITH_SYSTEM_PROMPT = (
     f"<s>{B_INST} {B_SYS}{{system_prompt}}{E_SYS}{{instruction}} {E_INST}"
 )
 
-DEFAULT_SYSTEM_PROMPT = """"""
+DEFAULT_SYSTEM_PROMPT = """You are a helpful coding assistant."""
 
 
 def wait_pget(file_name: str) -> bool:
@@ -49,6 +51,8 @@ class Predictor(BasePredictor):
         self.llm = Llama(
             model_path, n_ctx=4096, n_gpu_layers=-1, main_gpu=0, n_threads=1
         )
+
+        self.llm.tokenize = tokenize
 
     def predict(
         self,
@@ -80,15 +84,17 @@ class Predictor(BasePredictor):
             prompt_templated = PROMPT_TEMPLATE_WITH_SYSTEM_PROMPT.format(
                 system_prompt=system_prompt, instruction=user_prompt
             )
-
+    
         elif not self.is_instruct:
             prompt_templated = prompt
 
         print("Prompt:\n" + prompt_templated)
         output = ""
+        import json
+        prompt_json = json.dumps({"system_prompt": system_prompt, "prompt": prompt})
 
         for tok in self.llm(
-            prompt_templated,
+            prompt_json,
             grammar=None,
             max_tokens=max_tokens,
             stream=True,
