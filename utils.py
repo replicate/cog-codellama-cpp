@@ -119,7 +119,7 @@ def tokenize(prompt) -> Any:
     ]
     print("HERE*********")
     print(instructions)
-    return chat_completion_turns(TOKENIZER, instructions, 1024)[0]
+    return chat_completion_turns(TOKENIZER, instructions, 2048)[0]
 
 
 if __name__ == "__main__":

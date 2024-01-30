@@ -13,6 +13,10 @@ build:
     - "CMAKE_ARGS='-DLLAMA_CUBLAS=on' FORCE_CMAKE=1 pip install llama-cpp-python==0.2.6 --no-cache-dir"
     - "curl -o /usr/local/bin/pget -L 'https://github.com/replicate/pget/releases/download/v0.5.6/pget_linux_x86_64' && chmod +x /usr/local/bin/pget"
     - "mkdir -p /models"
+    - "pip install transformers"
+    - "pip install sentencepiece"
+    - "pip install torch"
+    - "pip install fairscale"
     #- "ln -s --force $(which echo) $(which pip)"
 
 predict: "predict.py:Predictor"
