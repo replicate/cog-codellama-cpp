@@ -27,7 +27,7 @@ PROMPT_TEMPLATE_WITH_SYSTEM_PROMPT = (
     f"<s>{B_INST} {B_SYS}{{system_prompt}}{E_SYS}{{instruction}} {E_INST}"
 )
 
-DEFAULT_SYSTEM_PROMPT = """You are a helpful coding assistant."""
+DEFAULT_SYSTEM_PROMPT = """"""
 
 
 def wait_pget(file_name: str) -> bool:
@@ -79,20 +79,20 @@ class Predictor(BasePredictor):
     ) -> ConcatenateIterator[str]:
         print("Pod hostname:", socket.gethostname())
         # If USE_SYSTEM_PROMPT is True, and the user has supplied some sort of system prompt, we add it to the prompt.
-        if self.is_instruct:
-            user_prompt = prompt.strip("\n").lstrip(B_INST).rstrip(E_INST).strip()
-            prompt_templated = PROMPT_TEMPLATE_WITH_SYSTEM_PROMPT.format(
-                system_prompt=system_prompt, instruction=user_prompt
-            )
+        # if self.is_instruct:
+        #     user_prompt = prompt.strip("\n").lstrip(B_INST).rstrip(E_INST).strip()
+        #     prompt_templated = PROMPT_TEMPLATE_WITH_SYSTEM_PROMPT.format(
+        #         system_prompt=system_prompt, instruction=user_prompt
+        #     )
     
-        elif not self.is_instruct:
-            prompt_templated = prompt
+        # elif not self.is_instruct:
+        #     prompt_templated = prompt
 
-        print("Prompt:\n" + prompt_templated)
+        # print("Prompt:\n" + prompt_templated)
         output = ""
         import json
         prompt_json = json.dumps({"system_prompt": system_prompt, "prompt": prompt})
-
+        
         for tok in self.llm(
             prompt_json,
             grammar=None,
@@ -108,6 +108,8 @@ class Predictor(BasePredictor):
         ):
             output += tok["choices"][0]["text"]
             yield tok["choices"][0]["text"]
+            if output.endswith("Source: assistant"):
+                break
         print("Output:", output)
 
     _predict = predict

@@ -87,13 +87,6 @@ def chat_completion_turns(tokenizer, dialogs, max_seq_len):
     # Here you can handle generation_tokens and generation_logprobs as per your requirement
 
     return prompt_tokens
-
-# class SpecialTokenizer:
-#     def __init__(self):
-#         self.tokenizer = Tokenizer('tokenizer/tokenizer.model')
-    
-#     def set_system_prompt(self, system_prompt):
-#         self.system_prompt = system_prompt
     
 def tokenize(prompt) -> Any:
         
@@ -101,23 +94,32 @@ def tokenize(prompt) -> Any:
     if isinstance(prompt, bytes):
         prompt = prompt.decode("utf-8")
     
-    print(prompt)
     prompt = json.loads(prompt)
-    print(prompt)
 
-    instructions = [
-        [
-            {
-                "role": "system",
-                "content": prompt["system_prompt"],
-            },
-            {
-                "role": "user",
-                "content": prompt["prompt"],
-            }
-        ],
-    ]
-    print("HERE*********")
+    if prompt["system_prompt"]:
+        instructions = [
+            [
+                {
+                    "role": "system",
+                    "content": prompt["system_prompt"],
+                },
+                {
+                    "role": "user",
+                    "content": prompt["prompt"],
+                }
+            ],
+        ]
+        
+    else:
+        instructions = [
+            [
+                {
+                    "role": "user",
+                    "content": prompt["prompt"],
+                }
+            ],
+        ]
+
     print(instructions)
     return chat_completion_turns(TOKENIZER, instructions, 2048)[0]
 
@@ -126,20 +128,7 @@ if __name__ == "__main__":
 
     prompt = "Write a function that computes the set of sums of all contiguous sublists of a given list."
     system_prompt = "Provide answers in JavaScript"
-
-    # instructions = [
-    #     [
-    #         {
-    #             "role": "system",
-    #             "content": "Provide answers in JavaScript",
-    #         },
-    #         {
-    #             "role": "user",
-    #             "content": "Write a function that computes the set of sums of all contiguous sublists of a given list.",
-    #         }
-    #     ],
-    # ]
-
+    prompt = json.dumps({"prompt": prompt, "system_prompt": system_prompt})
     tokens = tokenize(prompt)
     print(type(tokens))
     print(tokens)
